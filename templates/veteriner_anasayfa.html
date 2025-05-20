@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VetRand - Veteriner Ana Sayfası</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('/static/images/dene.jpg') no-repeat center center fixed;
+            background-size: cover;
+            color: #f8f9fa;
+            font-family: Arial, sans-serif;
+        }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            color: #7ca6d0 !important;
+        }
+        .main-container {
+            margin-top: 50px;
+        }
+        .welcome-section {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .welcome-section h2 {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #7ca6d0;
+        }
+        .appointments-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            color: #333;
+        }
+        .appointments-section h3 {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .notes-section {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            max-height: 250px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            position: relative;
+        }
+        .notes-section h3 {
+            font-size: 1rem;
+            color: #2c3e50;
+            text-align: center;
+        }
+        .animated-dog {
+            position: absolute;
+            top: -30px;
+            right: -20px;
+            width: 80px;
+            animation: bounce 2s infinite;
+        }
+        .list-group-item {
+            font-size: 0.8rem;
+            padding: 8px;
+            border: none;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">{{ veteriner.ad_soyad }}</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('veteriner_randevulari') }}">Randevularım</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('bildirimler') }}">Bildirimler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{{ url_for('profil') }}">Profilim</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-danger" href="{{ url_for('logout') }}">Çıkış Yap</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Ana İçerik -->
+    <div class="container main-container">
+        <div class="row">
+            <!-- Sol Kısım: Hoş Geldiniz ve En Yakın Randevular -->
+            <div class="col-md-8">
+                <!-- Hoş Geldiniz Bölümü -->
+                <div class="welcome-section">
+                    <h2>VetRand Hoş Geldiniz, {{ veteriner.ad_soyad }}!</h2>
+                </div>
+
+                <!-- En Yakın Randevular Bölümü -->
+                <div class="appointments-section">
+                    <h3>En Yakın Randevular</h3>
+                    <ul class="list-group">
+                        {% for randevu in randevular %}
+                        <li class="list-group-item">
+                            <div><strong>Hayvan:</strong> {{ randevu.hayvan.turu }}</div>
+                            <div><strong>Tarih:</strong> {{ randevu.tarih_saat.strftime('%d %B %Y - %H:%M') }}</div>
+                        </li>
+                        {% endfor %}
+                        {% if not randevular %}
+                        <p class="text-center text-muted mt-3">Şu anda yaklaşan bir randevunuz bulunmamaktadır.</p>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Sağ Kısım: Notlarım -->
+            <div class="col-md-4">
+                <div class="notes-section">
+                    <img src="/static/images/animated-dog.gif" alt="Animated Dog" class="animated-dog">
+                    <h3>Notlarım</h3>
+                    <form method="POST" action="{{ url_for('not_ekle') }}">
+                        <textarea name="icerik" rows="2" class="form-control mb-2" placeholder="Notunuzu buraya yazın..." required></textarea>
+                        <button type="submit" class="btn btn-primary btn-sm">Kaydet</button>
+                    </form>
+                    <ul class="list-group mt-3">
+                        {% for note in notlar %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ note.icerik }}</span>
+                            <div>
+                                <small class="text-muted">{{ note.tarih.strftime('%d %B %Y %H:%M') }}</small>
+                                <form method="POST" action="{{ url_for('not_sil', not_id=note.id) }}" style="display: inline;">
+                                    <button type="submit" class="btn btn-danger btn-sm ms-2">Sil</button>
+                                </form>
+                            </div>
+                        </li>
+                        {% endfor %}
+                        {% if not notlar %}
+                        <p class="text-center text-muted mt-3">Henüz not bulunmamaktadır.</p>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

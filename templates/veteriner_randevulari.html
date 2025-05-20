@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Veteriner Randevularım{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4" style="color: #4a90e2; font-weight: bold;">Veteriner Randevularım</h2>
+
+    {% if randevular %}
+        <!-- Takvim Görünümü -->
+        <div id="calendar" style="margin-bottom: 40px; border: 1px solid #ddd; border-radius: 8px; padding: 10px; background-color: #ffffff;"></div>
+        
+        <!-- Randevu Listesi -->
+        <div class="list-group">
+            {% for randevu in randevular %}
+            <div class="list-group-item mb-3" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div style="color: #2c3e50;">
+                        <strong>Hayvan Adı:</strong> {{ randevu.hayvan.ad }} <br>
+                        <strong>Tür:</strong> {{ randevu.hayvan.turu }} <br>
+                        <strong>Cins:</strong> {{ randevu.hayvan.cinsi }} <br>
+                        <strong>Randevu Tarihi:</strong> {{ randevu.tarih_saat.strftime('%d %B %Y - %H:%M') }} <br>
+                        <strong>Notlar:</strong> {{ randevu.notlar or 'Not eklenmemiş.' }}
+                    </div>
+                    <div>
+                        {% if session.get('role') == 'veteriner' %}
+                            <form action="{{ url_for('randevu_iptal', randevu_id=randevu.randevu_id) }}" method="POST" onsubmit="return confirm('Bu randevuyu iptal etmek istediğinize emin misiniz?');">
+                                <button type="submit" class="btn btn-danger btn-sm" style="border-radius: 5px;">Randevuyu İptal Et</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info text-center mt-3" style="font-size: 1.2rem;">
+            Henüz bir randevunuz yok.
+        </div>
+    {% endif %}
+</div>
+
+<!-- FullCalendar Kütüphanesi -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.5/index.global.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var calendarEl = document.getElementById('calendar');
+
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            locale: 'tr',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: {{ takvim_randevular|tojson }},
+            eventDidMount: function(info) {
+                if (info.event.extendedProps.durum === "Bekliyor") {
+                    info.el.style.backgroundColor = "#ffc107";
+                } else if (info.event.extendedProps.durum === "Onaylandı") {
+                    info.el.style.backgroundColor = "#4caf50";
+                }
+            },
+            eventClick: function(info) {
+                alert('Randevu: ' + info.event.title + '\\nTarih: ' + info.event.start.toLocaleString());
+            }
+        });
+
+        calendar.render();
+    });
+</script>
+
+<style>
+    body {
+        background: linear-gradient(135deg, #f0f4f8, #e6eaf3);
+        color: #2c3e50;
+        font-family: 'Arial', sans-serif;
+        padding: 20px;
+    }
+    .list-group-item {
+        background-color: #ffffff;
+        padding: 20px;
+        border: none;
+    }
+    .list-group-item:hover {
+        background-color: #f9f9f9;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+        transition: 0.3s ease;
+    }
+    #calendar {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+    }
+</style>
+{% endblock %}

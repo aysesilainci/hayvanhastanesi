@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f7f9fc;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+            border-color: #e74c3c;
+        }
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+        .btn-success {
+            background-color: #27ae60;
+            border-color: #27ae60;
+        }
+        .btn-success:hover {
+            background-color: #1e8449;
+            border-color: #1e8449;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            border-color: #f39c12;
+        }
+        .btn-warning:hover {
+            background-color: #e67e22;
+            border-color: #e67e22;
+        }
+        .btn-primary {
+            background-color: #4a90e2;
+            border-color: #4a90e2;
+        }
+        .btn-primary:hover {
+            background-color: #357ab7;
+            border-color: #357ab7;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+        .table th, .table td {
+            vertical-align: middle;
+        }
+        .table-actions {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+    <script>
+        function confirmDelete(event, userName) {
+            event.preventDefault();
+            const confirmAction = confirm(`${userName} adlı kullanıcıyı/veterineri silmek istediğinize emin misiniz?`);
+            if (confirmAction) {
+                event.target.closest('form').submit();
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- Çıkış Yap Butonu -->
+    <a href="{{ url_for('logout') }}" class="btn btn-danger logout-btn">Çıkış Yap</a>
+
+    <div class="container">
+        <h1 class="text-center mb-4">Admin Paneli</h1>
+        
+        <!-- Kullanıcılar Bölümü -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title">Kullanıcılar</h3>
+                <input type="text" id="searchUsers" class="form-control mb-3" placeholder="Kullanıcı Ara...">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Kullanıcı Adı</th>
+                            <th>E-posta</th>
+                            <th>Rol</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>{{ user.user_id }}</td>
+                            <td>{{ user.username }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role }}</td>
+                            <td class="table-actions">
+                                <form action="{{ url_for('admin_reset_password', user_id=user.user_id) }}" method="POST" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-warning btn-sm">Şifre Sıfırla</button>
+                                </form>
+                                <form action="{{ url_for('admin_delete_user', user_id=user.user_id) }}" method="POST" style="display:inline-block;">
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="confirmDelete(event, '{{ user.username }}')">Sil</button>
+                                </form>
+                                <a href="{{ url_for('admin_edit_user', user_id=user.user_id) }}" 
+                                   class="btn btn-success btn-sm">Düzenle</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Veterinerler Bölümü -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <h3 class="card-title d-flex justify-content-between align-items-center">
+                    Veterinerler
+                    <a href="{{ url_for('admin_add_veteriner') }}" class="btn btn-primary btn-sm">Yeni Veteriner Ekle</a>
+                </h3>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Ad Soyad</th>
+                            <th>E-posta</th>
+                            <th>Telefon</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for veteriner in veterinerler %}
+                        <tr>
+                            <td>{{ veteriner.veteriner_id }}</td>
+                            <td>{{ veteriner.ad_soyad }}</td>
+                            <td>{{ veteriner.email }}</td>
+                            <td>{{ veteriner.telefon }}</td>
+                            <td class="table-actions">
+                                <form action="{{ url_for('admin_veteriner_sil', veteriner_id=veteriner.veteriner_id) }}" method="POST">
+                                    <button type="submit" class="btn btn-danger btn-sm" 
+                                            onclick="confirmDelete(event, '{{ veteriner.ad_soyad }}')">Sil</button>
+                                </form>
+                                <a href="{{ url_for('admin_veteriner_duzenle', veteriner_id=veteriner.veteriner_id) }}" 
+                                   class="btn btn-success btn-sm">Düzenle</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Kullanıcı Arama
+        document.getElementById('searchUsers').addEventListener('keyup', function() {
+            const query = this.value.toLowerCase();
+            document.querySelectorAll('.table tbody tr').forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

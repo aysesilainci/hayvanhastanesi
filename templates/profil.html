@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profilim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: url("{{ url_for('static', filename='images/profil.jpg') }}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: Arial, sans-serif;
+        }
+        .profile-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: flex-start;
+            padding: 20px;
+            margin-top: 50px;
+        }
+        .profile-card {
+            width: 250px;
+            background: rgba(245, 242, 150, 0.9);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .profile-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 15px rgba(244, 137, 137, 0.4);
+        }
+        .profile-card h3 {
+            font-size: 1.2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .profile-card p {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .btn-edit {
+            margin-top: 10px;
+            background-color: #426957;
+            color: #e096ce;
+            border: none;
+            width: 100%;
+            font-weight: bold;
+            padding: 8px;
+        }
+        .btn-edit:hover {
+            background-color: #355046;
+        }
+    </style>
+</head>
+<body>
+    {% extends "base.html" %}
+
+    {% block title %}Profilim{% endblock %}
+
+    {% block content %}
+    <div class="profile-container">
+        {% if session['role'] == 'user' %}
+            <div class="profile-card">
+                <h3>Kullanıcı Adı</h3>
+                <p>{{ user.username }}</p>
+                <a href="{{ url_for('duzenle_profil', field='username') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+            <div class="profile-card">
+                <h3>E-posta</h3>
+                <p>{{ user.email }}</p>
+                <a href="{{ url_for('duzenle_profil', field='email') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+            <div class="profile-card">
+                <h3>Telefon</h3>
+                <p>{{ user.telefon }}</p>
+                <a href="{{ url_for('duzenle_profil', field='telefon') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+            <div class="profile-card">
+                <h3>Adres</h3>
+                <p>{{ user.adres }}</p>
+                <a href="{{ url_for('duzenle_profil', field='adres') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+        {% elif session['role'] == 'veteriner' %}
+            <div class="profile-card">
+                <h3>Ad Soyad</h3>
+                <p>{{ veteriner.ad_soyad }}</p>
+                <a href="{{ url_for('duzenle_profil', field='ad_soyad') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+            <div class="profile-card">
+                <h3>Telefon</h3>
+                <p>{{ veteriner.telefon }}</p>
+                <a href="{{ url_for('duzenle_profil', field='telefon') }}" class="btn btn-edit">Düzenle</a>
+            </div>
+        {% else %}
+            <p>Bu sayfayı görüntülemek için giriş yapmanız gerekiyor.</p>
+        {% endif %}
+    </div>
+    {% endblock %}
+</body>
+</html>
